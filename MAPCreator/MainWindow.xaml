@@ -1,0 +1,130 @@
+﻿<Window x:Name="mainWindow" x:Class="MAPCreator.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MAPCreator"
+        mc:Ignorable="d"
+        Title="Map Creator" Height="480" Width="800" WindowStartupLocation="CenterScreen" >
+    <Grid Margin="0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="25"/>
+            <RowDefinition Height="100*"/>
+        </Grid.RowDefinitions>
+        <DockPanel Height="24" VerticalAlignment="Top">
+            <Menu x:Name="menu" Grid.ColumnSpan="3">
+                <MenuItem Header="Файл" HorizontalAlignment="Left" >
+                    <MenuItem Header="Открыть" Click="OpenFile_Click"/>
+                    <MenuItem Header="Сохранить" Click="SaveFile_Click"/>
+                    <Separator/>
+                    <MenuItem x:Name="report" Header="Сформировать отчет" Click="Report_Click"/>
+                    <Separator/>
+                    <MenuItem Header="Выход" Click="Exit_Click"/>
+                </MenuItem>
+                <MenuItem Header="Настройки">
+                    <MenuItem Header="Параметры связи"/>
+                </MenuItem>
+                <MenuItem Header="Помощь">
+                    <MenuItem Header="Справка"/>
+                    <MenuItem Header="О программе"/>
+                </MenuItem>
+            </Menu>
+        </DockPanel>
+        <TabControl x:Name="tabControl" Margin="0" Grid.Row="1">
+            <TabItem Header="Формирование группы оборудования">
+                <Grid Background="#FFE5E5E5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100*"/>
+                        <ColumnDefinition Width="250"/>
+                    </Grid.ColumnDefinitions>
+                    <WrapPanel Name ="myPanel" Margin="10" Grid.Row="1"/>
+                    <GroupBox x:Name="groupBox" Header="Параметры шкафа" HorizontalAlignment="Left" Margin="10,10,0,10" Width="230" Grid.Column="1">
+                        <Grid>
+                            <Button x:Name="btnAddShield" Content="Добавить" HorizontalAlignment="Left" Height="22" Margin="10,83.1,0,0" VerticalAlignment="Top" Width="90" Click="AddShield_Click"/>
+                            <ComboBox x:Name="cBoxSType" HorizontalAlignment="Left" Margin="10,40,0,0" VerticalAlignment="Top" Width="90" GotFocus="Object_GotFocus">
+                                <TextBlock>ШОЛ</TextBlock>
+                                <TextBlock>ПУ</TextBlock>
+                                <TextBlock>ШК</TextBlock>
+                                <TextBlock>ШВЛ</TextBlock>
+                                <TextBlock>ШВП</TextBlock>
+                                <TextBlock>ШС</TextBlock>
+                                <TextBlock>ШВА</TextBlock>
+                                <TextBlock>УВН</TextBlock>
+                                <TextBlock>ИБП</TextBlock>
+                            </ComboBox>
+                            <Label Content="Тип шкафа" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="90" Height="25"/>
+                            <Label Content="Номер шкафа" HorizontalAlignment="Left" Margin="118,10,0,0" VerticalAlignment="Top" Width="90" Height="25"/>
+                            <ComboBox x:Name="cBoxSNum" HorizontalAlignment="Left" Margin="118,40,0,0" VerticalAlignment="Top" Width="90" GotFocus="Object_GotFocus">
+                                <TextBlock>1</TextBlock>
+                                <TextBlock>2</TextBlock>
+                                <TextBlock>3</TextBlock>
+                                <TextBlock>4</TextBlock>
+                                <TextBlock>5</TextBlock>
+                                <TextBlock>6</TextBlock>
+                                <TextBlock>7</TextBlock>
+                                <TextBlock>8</TextBlock>
+                                <TextBlock>9</TextBlock>
+                                <TextBlock>10</TextBlock>
+                                <TextBlock>11</TextBlock>
+                                <TextBlock>12</TextBlock>
+                                <TextBlock>13</TextBlock>
+                                <TextBlock>14</TextBlock>
+                                <TextBlock>15</TextBlock>
+                                <TextBlock>16</TextBlock>
+                                <TextBlock>17</TextBlock>
+                                <TextBlock>18</TextBlock>
+                                <TextBlock>19</TextBlock>
+                                <TextBlock>20</TextBlock>
+                            </ComboBox>
+                            <Button x:Name="btnDelShield" Content="Удалить" HorizontalAlignment="Left" Height="22" Margin="118,83.1,0,0" VerticalAlignment="Top" Width="90" Click="DelShield_Click"/>
+                            <GroupBox x:Name="groupBox1" Header="Параметры устройства" HorizontalAlignment="Left" Height="220" Margin="10,128.5,0,0" VerticalAlignment="Top" Width="198">
+                                <Grid>
+                                    <Button x:Name="btnAddDevice" Content="Добавить" HorizontalAlignment="Left" Height="22" VerticalAlignment="Top" Width="90" Click="AddDevice_Click" Margin="1,141,0,0" IsEnabled="False"/>
+                                    <Button x:Name="btnDelDevice" Content="Удалить" HorizontalAlignment="Left" Height="22" VerticalAlignment="Top" Width="90" Click="DelDevice_Click" Margin="96,141,0,0" IsEnabled="False"/>
+                                    <Button x:Name="btnEditDevice" Content="Редактировать список сигналов" HorizontalAlignment="Left" Height="22" VerticalAlignment="Top" Width="186" Click="EditDevice_Click" Margin="0,171,0,0" IsEnabled="False"/>
+                                    <Label Content="Тип устройства" HorizontalAlignment="Left" Margin="1,9,0,0" VerticalAlignment="Top" Width="105" Height="25"/>
+                                    <Label Content="Сетевой адрес" HorizontalAlignment="Left" Margin="96,9,0,0" VerticalAlignment="Top" Width="90" Height="25"/>
+                                    <ComboBox x:Name="cBoxDNum" HorizontalAlignment="Left" Margin="96,39,0,0" VerticalAlignment="Top" Width="90" GotFocus="Object_GotFocus">
+                                        <TextBlock>1</TextBlock>
+                                        <TextBlock>2</TextBlock>
+                                        <TextBlock>3</TextBlock>
+                                        <TextBlock>4</TextBlock>
+                                        <TextBlock>5</TextBlock>
+                                        <TextBlock>6</TextBlock>
+                                        <TextBlock>7</TextBlock>
+                                        <TextBlock>8</TextBlock>
+                                        <TextBlock>9</TextBlock>
+                                        <TextBlock>10</TextBlock>
+                                        <TextBlock>11</TextBlock>
+                                        <TextBlock>12</TextBlock>
+                                        <TextBlock>13</TextBlock>
+                                        <TextBlock>14</TextBlock>
+                                        <TextBlock>15</TextBlock>
+                                        <TextBlock>16</TextBlock>
+                                        <TextBlock>17</TextBlock>
+                                        <TextBlock>18</TextBlock>
+                                        <TextBlock>19</TextBlock>
+                                        <TextBlock>20</TextBlock>
+                                    </ComboBox>
+                                    <ComboBox x:Name="cBoxDType" HorizontalAlignment="Left" Margin="0,39,0,0" VerticalAlignment="Top" Width="90" ItemsSource="{Binding}" DisplayMemberPath="DeviceType" GotFocus="Object_GotFocus"/>
+                                    <Label Content="Скорость" HorizontalAlignment="Left" Margin="3,61,0,0" VerticalAlignment="Top" Width="89" Height="25"/>
+                                    <ComboBox x:Name="cBoxDBaud" HorizontalAlignment="Left" Margin="0,90,0,0" VerticalAlignment="Top" Width="90" GotFocus="Object_GotFocus">
+                                        <TextBlock>19200</TextBlock>
+                                        <TextBlock>9600</TextBlock>
+                                        <TextBlock>4800</TextBlock>
+                                    </ComboBox>
+                                    <ComboBox x:Name="cBoxDParity" HorizontalAlignment="Left" Margin="96,90,0,0" VerticalAlignment="Top" Width="90" GotFocus="Object_GotFocus">
+                                        <TextBlock><Run Text="even"/></TextBlock>
+                                        <TextBlock><Run Text="none"/></TextBlock>
+                                        <TextBlock><Run Text="odd"/></TextBlock>
+                                    </ComboBox>
+                                    <Label Content="Паритет" HorizontalAlignment="Left" Margin="97,61,0,0" VerticalAlignment="Top" Width="89" Height="25"/>
+                                </Grid>
+                            </GroupBox>
+                        </Grid>
+                    </GroupBox>
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>

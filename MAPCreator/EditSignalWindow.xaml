@@ -1,0 +1,185 @@
+﻿<Window x:Class="MAPCreator.EditSignalWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MAPCreator"   
+        mc:Ignorable="d"   
+        Height="480" Width="800" WindowStartupLocation="CenterScreen">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="378*"/>
+            <RowDefinition Height="72"/>
+        </Grid.RowDefinitions>
+        <DockPanel>
+            <ListView x:Name="listView" ItemsSource="{Binding}"  MouseLeftButtonUp ="ListView_Selected" DockPanel.Dock="Top" Padding="0,0,0,22" BorderThickness="0" HorizontalAlignment="Left" Margin="0"   >
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn  x:Name="Column1" Header="Код функции" Width="80" DisplayMemberBinding="{Binding FunctionCode}" />
+                        <GridViewColumn  x:Name="Column2" Header="Наименование сигнала" Width="{Binding ElementName=comboBox2,Path=ActualWidth}" DisplayMemberBinding="{Binding SignalName}"/>
+                        <GridViewColumn  x:Name="Column3" Header="Тип данных" Width="80" DisplayMemberBinding="{Binding DataType}"/>
+                        <GridViewColumn  x:Name="Column4" Header="Адрес регистра" Width="100" DisplayMemberBinding="{Binding RegisterAddress}"/>
+                        <GridViewColumn  x:Name="Column5" Header="Номер бита" Width="80" DisplayMemberBinding="{Binding BitNumber}"/>
+                        <GridViewColumn Width="52" DisplayMemberBinding="{Binding TargetNullValue}"/>
+                    </GridView>
+                </ListView.View>
+                <ListView.ItemContainerStyle>
+                    <Style TargetType= "ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                    </Style>
+                </ListView.ItemContainerStyle>
+
+            </ListView>
+            <Grid  Height="22" VerticalAlignment="Top" DockPanel.Dock="Top" Margin="0,-22,0,0" >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="{Binding ElementName=Column1,Path=Width}"/>
+                    <ColumnDefinition Width="390*"/>
+                    <ColumnDefinition Width="{Binding ElementName=Column3,Path=Width}"/>
+                    <ColumnDefinition Width="{Binding ElementName=Column4,Path=Width}"/>
+                    <ColumnDefinition Width="{Binding ElementName=Column5,Path=Width}"/>
+                    <ColumnDefinition Width="60"/>
+                </Grid.ColumnDefinitions>
+                <ComboBox x:Name="comboBox1" Width="{Binding ElementName=Column1,Path=Width}" DataContext="{Binding ElementName=listView, Path=SelectedItem}" Text="{Binding Path= FunctionCode}" >
+                    <TextBlock>1</TextBlock>
+                    <TextBlock>2</TextBlock>
+                    <TextBlock>3</TextBlock>
+                    <TextBlock>4</TextBlock>
+                    <TextBlock>5</TextBlock>
+                    <TextBlock>6</TextBlock>
+                    <TextBlock>15</TextBlock>
+                    <TextBlock>16</TextBlock>
+                </ComboBox>
+                <ComboBox x:Name="comboBox2"  DataContext="{Binding ElementName=listView, Path=SelectedItem}" Text="{Binding Path= SignalName}" IsEditable="True" Grid.Column="1"/>
+                <ComboBox x:Name="comboBox3" Width="{Binding ElementName=Column3,Path=Width}" DataContext="{Binding ElementName=listView, Path=SelectedItem}" Text="{Binding Path= DataType}" Grid.Column="2">
+                    <TextBlock>BOOL</TextBlock>
+                    <TextBlock>WORD</TextBlock>
+                    <TextBlock>DWORD</TextBlock>
+                    <TextBlock>INT</TextBlock>
+                    <TextBlock>DINT</TextBlock>
+                    <TextBlock>FLOAT</TextBlock>
+                </ComboBox>
+                <ComboBox x:Name="comboBox4" Width="{Binding ElementName=Column4,Path=Width}" DataContext="{Binding ElementName=listView, Path=SelectedItem}" Text="{Binding Path= RegisterAddress}" Grid.Column="3" IsEditable="True">
+                    <TextBlock>51</TextBlock>
+                </ComboBox>
+                <ComboBox x:Name="comboBox5" Width="{Binding ElementName=Column5,Path=Width}" DataContext="{Binding ElementName=listView, Path=SelectedItem}" Text="{Binding Path= BitNumber}" Grid.Column="4">
+                    <TextBlock></TextBlock>
+                    <TextBlock>0</TextBlock>
+                    <TextBlock>1</TextBlock>
+                    <TextBlock>2</TextBlock>
+                    <TextBlock>3</TextBlock>
+                    <TextBlock>4</TextBlock>
+                    <TextBlock>5</TextBlock>
+                    <TextBlock>6</TextBlock>
+                    <TextBlock>7</TextBlock>
+                    <TextBlock>8</TextBlock>
+                    <TextBlock>9</TextBlock>
+                    <TextBlock>10</TextBlock>
+                    <TextBlock>11</TextBlock>
+                    <TextBlock>12</TextBlock>
+                    <TextBlock>13</TextBlock>
+                    <TextBlock>14</TextBlock>
+                    <TextBlock>15</TextBlock>
+                </ComboBox>
+                <Button x:Name="btnAddSignal" Width="22" Content="+" Click="BtnAddSignal_Click" Grid.Column="5" HorizontalAlignment="Left"/>
+                <Button Width="22" Content="-" Height="22" Grid.Column="5" Margin="22,0,0,0" HorizontalAlignment="Left" Click="BtnDelSignal_Click"/>
+            </Grid>
+        </DockPanel>
+        <GroupBox x:Name="groupBox" Header="Автогенерация" Grid.Row="2" Margin="0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="21*"/>
+                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="55"/>
+                </Grid.ColumnDefinitions>
+                <Button x:Name="btnOK" Content="ОК" Grid.Column="3" Margin="5,0,0,0" Click="BtnGenSignal_Click" VerticalContentAlignment="Center" Padding="1" HorizontalContentAlignment="Center" VerticalAlignment="Bottom" />
+                <ComboBox x:Name="countQF" HorizontalAlignment="Center" VerticalAlignment="Bottom" Width="90" Grid.Column="2" Margin="5,0">
+                    <TextBlock>1</TextBlock>
+                    <TextBlock>2</TextBlock>
+                    <TextBlock>3</TextBlock>
+                    <TextBlock>4</TextBlock>
+                    <TextBlock>5</TextBlock>
+                    <TextBlock>6</TextBlock>
+                    <TextBlock>7</TextBlock>
+                    <TextBlock>8</TextBlock>
+                </ComboBox>
+                <Label x:Name="numFirstQFlabelH" Content="Номер первого"  Height="17" Margin="0,-2.45,0,35.45"  Width="90" Padding="0" HorizontalContentAlignment="Center" Grid.Column="1" HorizontalAlignment="Center"/>
+                <Label x:Name="numFirstQFlabelL" Content="выключателя"  Height="17" Margin="0,10.5,0,22.5"  Width="90" Padding="0" HorizontalContentAlignment="Center" Grid.Column="1" HorizontalAlignment="Center"/>
+                <ComboBox x:Name="numFirstQF" HorizontalAlignment="Center" VerticalAlignment="Bottom" Width="90" Grid.Column="1" Margin="5,0">
+                    <TextBlock>1</TextBlock>
+                    <TextBlock>2</TextBlock>
+                    <TextBlock>3</TextBlock>
+                    <TextBlock>4</TextBlock>
+                    <TextBlock>5</TextBlock>
+                    <TextBlock>6</TextBlock>
+                    <TextBlock>7</TextBlock>
+                    <TextBlock>8</TextBlock>
+                    <TextBlock>9</TextBlock>
+                    <TextBlock>10</TextBlock>
+                    <TextBlock>11</TextBlock>
+                    <TextBlock>12</TextBlock>
+                    <TextBlock>13</TextBlock>
+                    <TextBlock>14</TextBlock>
+                    <TextBlock>15</TextBlock>
+                    <TextBlock>16</TextBlock>
+                    <TextBlock>17</TextBlock>
+                    <TextBlock>18</TextBlock>
+                    <TextBlock>19</TextBlock>
+                    <TextBlock>20</TextBlock>
+                    <TextBlock>21</TextBlock>
+                    <TextBlock>22</TextBlock>
+                    <TextBlock>23</TextBlock>
+                    <TextBlock>24</TextBlock>
+                    <TextBlock>25</TextBlock>
+                    <TextBlock>26</TextBlock>
+                    <TextBlock>27</TextBlock>
+                    <TextBlock>28</TextBlock>
+                    <TextBlock>29</TextBlock>
+                    <TextBlock>30</TextBlock>
+                    <TextBlock>31</TextBlock>
+                    <TextBlock>32</TextBlock>
+                    <TextBlock>33</TextBlock>
+                    <TextBlock>34</TextBlock>
+                    <TextBlock>35</TextBlock>
+                    <TextBlock>36</TextBlock>
+                    <TextBlock>37</TextBlock>
+                    <TextBlock>38</TextBlock>
+                    <TextBlock>39</TextBlock>
+                    <TextBlock>40</TextBlock>
+                    <TextBlock>41</TextBlock>
+                    <TextBlock>42</TextBlock>
+                    <TextBlock>43</TextBlock>
+                    <TextBlock>44</TextBlock>
+                    <TextBlock>45</TextBlock>
+                    <TextBlock>46</TextBlock>
+                    <TextBlock>47</TextBlock>
+                    <TextBlock>48</TextBlock>
+                    <TextBlock>49</TextBlock>
+                    <TextBlock>50</TextBlock>
+                    <TextBlock>51</TextBlock>
+                    <TextBlock>52</TextBlock>
+                    <TextBlock>53</TextBlock>
+                    <TextBlock>54</TextBlock>
+                    <TextBlock>55</TextBlock>
+                    <TextBlock>56</TextBlock>
+                    <TextBlock>57</TextBlock>
+                    <TextBlock>58</TextBlock>
+                    <TextBlock>59</TextBlock>
+                    <TextBlock>60</TextBlock>
+                </ComboBox>
+                <Label x:Name="countQFlabelH" Content="Количество"  Height="17" Margin="0,-2.45,0,35.45"  Width="90" Padding="0" HorizontalContentAlignment="Center" Grid.Column="2" HorizontalAlignment="Center"/>
+                <Label x:Name="countQFlabelL" Content="выключателей"  Height="17" Margin="0,10.5,0,22.5"  Width="90" Padding="0" HorizontalContentAlignment="Center" Grid.Column="2" HorizontalAlignment="Center"/>
+                <Button Content="Из шаблона" Margin="5,0,30,0" Click="BtnGenFromTemplate_Click" VerticalContentAlignment="Center" Padding="1" HorizontalContentAlignment="Center" Width="90" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
+                <ComboBox x:Name="numPowerInput" HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="90" Margin="110,0,0,0" >
+                    <TextBlock><Run Text="1"/></TextBlock>
+                    <TextBlock><Run Text="2"/></TextBlock>
+                    <TextBlock><Run Text="4"/></TextBlock>
+                    <TextBlock><Run Text="5"/></TextBlock>
+                </ComboBox>
+                <Label x:Name="numPowerInputLabelH" Content="Номер вводного"  Height="17" Margin="100,-2.45,315,35.45"  Width="110" Padding="0" HorizontalContentAlignment="Center" HorizontalAlignment="Center"/>
+                <Label x:Name="numPowerInputLabelL" Content="выключателя"  Height="17" Margin="100,10.5,315,22.5"  Width="110" Padding="0" HorizontalContentAlignment="Center" HorizontalAlignment="Center"/>
+            </Grid>
+        </GroupBox>
+
+    </Grid>
+</Window>
