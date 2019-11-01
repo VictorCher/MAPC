@@ -92,7 +92,7 @@
                     <ColumnDefinition Width="100"/>
                     <ColumnDefinition Width="55"/>
                 </Grid.ColumnDefinitions>
-                <Button x:Name="btnOK" Content="ОК" Grid.Column="3" Margin="5,0,0,0" Click="BtnGenSignal_Click" VerticalContentAlignment="Center" Padding="1" HorizontalContentAlignment="Center" VerticalAlignment="Bottom" />
+                <Button x:Name="btnOK" Content="ОК" Grid.Column="3" Margin="5,0,0,0" Click="BtnGenSignal_Click" VerticalContentAlignment="Center" Padding="1" HorizontalContentAlignment="Center" VerticalAlignment="Bottom" Height="22" />
                 <ComboBox x:Name="countQF" HorizontalAlignment="Center" VerticalAlignment="Bottom" Width="90" Grid.Column="2" Margin="5,0">
                     <TextBlock>1</TextBlock>
                     <TextBlock>2</TextBlock>
@@ -169,7 +169,8 @@
                 </ComboBox>
                 <Label x:Name="countQFlabelH" Content="Количество"  Height="17" Margin="0,-2.45,0,35.45"  Width="90" Padding="0" HorizontalContentAlignment="Center" Grid.Column="2" HorizontalAlignment="Center"/>
                 <Label x:Name="countQFlabelL" Content="выключателей"  Height="17" Margin="0,10.5,0,22.5"  Width="90" Padding="0" HorizontalContentAlignment="Center" Grid.Column="2" HorizontalAlignment="Center"/>
-                <Button Content="Из шаблона" Margin="5,0,30,0" Click="BtnGenFromTemplate_Click" VerticalContentAlignment="Center" Padding="1" HorizontalContentAlignment="Center" Width="90" HorizontalAlignment="Left" VerticalAlignment="Bottom" />
+                <Button Content="Очистить всё" Margin="5,0,30,25" Click="BtnClearAll_Click" VerticalContentAlignment="Center" Padding="1" HorizontalContentAlignment="Center" Width="90" HorizontalAlignment="Left" VerticalAlignment="Bottom" Height="22" />
+                <Button Content="Из шаблона" Margin="5,0,30,0" Click="BtnGenFromTemplate_Click" VerticalContentAlignment="Center" Padding="1" HorizontalContentAlignment="Center" Width="90" HorizontalAlignment="Left" VerticalAlignment="Bottom" Height="22" />
                 <ComboBox x:Name="numPowerInput" HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="90" Margin="110,0,0,0" >
                     <TextBlock><Run Text="1"/></TextBlock>
                     <TextBlock><Run Text="2"/></TextBlock>

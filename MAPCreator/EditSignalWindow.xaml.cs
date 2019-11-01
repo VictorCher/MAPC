@@ -96,5 +96,14 @@ namespace MAPCreator
             }
             
         }
+
+        private void BtnClearAll_Click(object sender, RoutedEventArgs e)
+        {
+            listView.SelectAll();
+            while(listView.SelectedIndex != -1)
+            {
+                delSignal.Invoke(0);
+            }
+        }
     }
 }

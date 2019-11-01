@@ -1,11 +1,11 @@
 ﻿// Программа-конфигуратор карты адресного пространства
 // Разработал: Чернышов Виктор
 // Дата создания: 16.09.2019г
-// Версия: 1.0
 
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Ports;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -76,6 +76,11 @@ namespace MAPCreator
             this.Content = new TextBlock() { Text = $"{header.DeviceType}\n(Slave {header.DeviceAddress})",TextAlignment = TextAlignment.Center };
             Signal = new ObservableCollection<Signal>();
         }
+
+        /*public void ChangeBackground()
+        {
+            this.ClearValue(Control.BackgroundProperty); // Восстановление цвета по умолчанию
+        }*/
     }
 
     public class ViewShield : Button
@@ -95,13 +100,13 @@ namespace MAPCreator
             this.Height = 180;
             this.Width = 100;
             this.Cursor = Cursors.Hand;
-            this.Margin = new Thickness(0, 5, 0, 0);
+            this.Margin = new Thickness(0, 0, 0, 15);
             this.Click += UpdateForm_Click;
             this.ShieldPanel.Children.Add(new Label()
             {
                 Content = $"{sType} {sNum}",
                 HorizontalContentAlignment = HorizontalAlignment.Center
-            });
+            });    
         }
 
         public void AddDevice(string dType, int dNum, int dBaud, string dParity, RoutedEventHandler UpdateForm_Click)
@@ -126,21 +131,28 @@ namespace MAPCreator
     public partial class MainWindow : Window
     {
         ViewDevice SelectedDevice { get; set; }
+        int TempShieldNum { get; set; }
+        int TempDeviceAdr { get; set; }
         EditSignalWindow editSignalWindow;
+        ConnectionSetup connectionSetup;
         List<DevicePattern> Pattern { get; set; }
 
-        public MainWindow()
+        public void LoadConfig()
         {
             InitializeComponent();
-            
+            NumberServerPort = new string[]{ "4001", "4002", "4003", "4004" };
+            NumberComPort = new string[] { "COM1", "COM2", "COM3", "COM4" };
+            // Определяем путь к папке где лежит исполняемый файл .exe для того, чтобы получить доступ
+            // к папке с ресурсами (если программа вызывается не из той папки в которой лежит .exe)
+            string globalPath = AppDomain.CurrentDomain.BaseDirectory;
             Pattern = new List<DevicePattern>();
             DataContext = Pattern;
-            DirectoryInfo dir = new DirectoryInfo(@"Resources");
+            DirectoryInfo dir = new DirectoryInfo(globalPath+ @"\Resources");
             FileInfo[] file = dir.GetFiles("*.csv");
             foreach (FileInfo f in file)
             {
                 string deviceType = f.Name.Split('.')[0];
-                string[] lines = File.ReadAllLines(@"Resources\" + f.Name, Encoding.GetEncoding(1251));
+                string[] lines = File.ReadAllLines(globalPath + @"\Resources\" + f.Name, Encoding.GetEncoding(1251));
                 List<Signal> signal = new List<Signal>();
                 foreach (string s in lines)
                 {
@@ -159,6 +171,23 @@ namespace MAPCreator
                     catch { }
                 }
                 Pattern.Add(new DevicePattern { DeviceType = f.Name.Split('.')[0], DeviceSignal = new List<Signal>(signal) });
+            }
+        }
+
+        public MainWindow()
+        {
+            LoadConfig();
+            string[] args = Environment.GetCommandLineArgs();
+
+            if (args.Count()==2 )
+            {
+                if (!string.IsNullOrEmpty(args[1]) && File.Exists(args[1]))
+                {
+                    SerializationShield serializationShield = new SerializationShield();
+                    serializationShield.Read(args[1], myPanel, UpdateForm_Click);
+                    SortShield();
+                    this.Title += " - " + args[1];
+                }
             }
         }
 
@@ -186,6 +215,10 @@ namespace MAPCreator
                 btnAddDevice.IsEnabled = true;
                 btnDelDevice.IsEnabled = true;
                 btnEditDevice.IsEnabled = false;
+                btnEditDeviceAdr.IsEnabled = false;
+                TempShieldNum = selectedButton.SNum;
+                btnEditShield.IsEnabled = true;
+                EditShielNum_Label.Content = $"Изм. номер шкафа {selectedButton.SType} {selectedButton.SNum}?";
             }
             else if (e.Source is ViewDevice)
             {
@@ -199,6 +232,9 @@ namespace MAPCreator
                 ViewShield selectedShield = (ViewShield)selectedPanel.Parent;
                 cBoxSType.Text = selectedShield.SType;
                 cBoxSNum.Text = selectedShield.SNum.ToString();
+                TempDeviceAdr = SelectedDevice.Header.DeviceAddress;
+                btnEditDeviceAdr.IsEnabled = true;
+                EditDeviceAdr_Label.Content = $"Изм. адрес {SelectedDevice.Header.DeviceAddress} ({SelectedDevice.Header.DeviceType})?";
             }
         }
 
@@ -256,7 +292,7 @@ namespace MAPCreator
 
         private void DelShield_Click(object sender, RoutedEventArgs e)
         {
-            bool ok = int.TryParse(cBoxSNum.Text, out int sNum);
+            int.TryParse(cBoxSNum.Text, out int sNum);
             int pos = -1;
             foreach (ViewShield s in myPanel.Children)
             {
@@ -265,6 +301,48 @@ namespace MAPCreator
                 {
                     myPanel.Children.RemoveAt(pos);
                     break;
+                }
+            }
+            SortShield();
+        }
+
+        private void EditShieldNum_Click(object sender, RoutedEventArgs e)
+        {
+            int.TryParse(cBoxSNum.Text, out int sNum);
+            foreach (ViewShield s in myPanel.Children)
+            {
+                // Находим шкаф который хотим отредактировать
+                if (s.SNum == TempShieldNum && s.SType == cBoxSType.Text)
+                {
+                    // Проверяем будет ли шкаф уникальным после редактирования 
+                    bool free = true;
+                    foreach (ViewShield search in myPanel.Children)
+                    {
+                        if (search.SNum == sNum && search.SType == cBoxSType.Text)
+                        {
+                            free = false;
+                            break;
+                        }
+                    }
+                    // Меняем номер шкафа и заголовки у устройств в этом шкафу
+                    if (free == true) {
+                        btnEditShield.IsEnabled = false;
+                        EditShielNum_Label.Content = "";
+                        s.SNum = sNum;
+                        foreach (object d in s.ShieldPanel.Children)
+                        {
+                            if (d is Label)
+                            {
+                                ((Label)d).Content = $"{s.SType} {sNum}";
+
+                            }
+                            if (d is ViewDevice)
+                            {
+                                ((ViewDevice)d).Header.ShieldNumber = sNum;
+                            }
+                        }
+                        break;
+                    }
                 }
             }
             SortShield();
@@ -317,6 +395,43 @@ namespace MAPCreator
                 }
             }
             catch { }
+        }
+
+        private void EditDeviceAdr_Click(object sender, RoutedEventArgs e)
+        {
+            int.TryParse(cBoxSNum.Text, out int sNum);
+            int.TryParse(cBoxDNum.Text, out int dNum);
+            foreach (ViewShield s in myPanel.Children)
+            {
+                // Находим шкаф в котором редактируемое устройство
+                if (s.SNum == sNum && s.SType == cBoxSType.Text)
+                {                   
+                    // Меняем номер шкафа и заголовки у устройств в этом шкафу    
+                    
+                    
+                    // Находим устройство, которое хотим отредактировать
+                    foreach (object d in s.ShieldPanel.Children)
+                    {
+                        if (d is ViewDevice)
+                        {
+                            if (((ViewDevice)d).Header.DeviceAddress == TempDeviceAdr)
+                            {
+                                btnEditDeviceAdr.IsEnabled = false;
+                                EditDeviceAdr_Label.Content = "";
+                                ((ViewDevice)d).Header.DeviceAddress = dNum;
+                                ((ViewDevice)d).Content = new TextBlock()
+                                {
+                                    Text = $"{((ViewDevice)d).Header.DeviceType}\n(Slave {((ViewDevice)d).Header.DeviceAddress})",
+                                    TextAlignment = TextAlignment.Center
+                                };
+                            }
+                            //this.Content = new TextBlock() { Text = $"{header.DeviceType}\n(Slave {header.DeviceAddress})", TextAlignment = TextAlignment.Center };
+                        }
+                    }
+                    break;
+                }
+            }
+            SortShield();
         }
 
         private void EditDevice_Click(object sender, RoutedEventArgs e)
@@ -450,8 +565,155 @@ namespace MAPCreator
             {
                 SerializationShield serializationShield = new SerializationShield();
                 serializationShield.Write(dialog.FileName, myPanel);
+                this.Title = "Map Creator - " + dialog.FileName;
             }
+
             MessageBox.Show("Файл конфигурации успешно сохранен!", "Сохранение", MessageBoxButton.OK);
+        }
+
+        private void Help_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("Извините! Справка пока не доступна", "Справка", MessageBoxButton.OK);
+        }
+
+        private void About_Click(object sender, RoutedEventArgs e)
+        {
+            string name = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name.ToString();
+            string verion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            string f = System.Reflection.Assembly.GetExecutingAssembly().GetName().ToString();
+            MessageBox.Show($"Название продукта: {name}{'\n'}Версия продукта: {verion}{'\n'}© Чернышов В.В., 2019", "О программе", MessageBoxButton.OK);
+        }
+
+        public string[] NumberComPort { get; set; }
+        public string ComParity { get; set; }
+        public string ComBaudRate { get; set; }
+        public string TypeConnection { get; set; }
+        public string CountPorts { get; set; }
+        public string ServerIP { get; set; }
+        public string[] NumberServerPort { get; set; }
+        private void ConnectionSetup_Click(object sender, RoutedEventArgs e)
+        {
+            connectionSetup = new ConnectionSetup();
+            connectionSetup.ComPort1.Text = NumberComPort[0];
+            connectionSetup.ComPort2.Text = NumberComPort[1];
+            connectionSetup.ComPort3.Text = NumberComPort[2];
+            connectionSetup.ComPort4.Text = NumberComPort[3];
+            connectionSetup.TypeConnection.Text = TypeConnection;
+            connectionSetup.CountPorts.Text = CountPorts;
+            connectionSetup.ServerPort1.Text = NumberServerPort[0];
+            connectionSetup.ServerPort2.Text = NumberServerPort[1];
+            connectionSetup.ServerPort3.Text = NumberServerPort[2];
+            connectionSetup.ServerPort4.Text = NumberServerPort[3];
+            connectionSetup.ServerIP.Text = ServerIP;
+
+            connectionSetup.ShowDialog();
+
+            NumberComPort[0] = connectionSetup.ComPort1.Text;
+            NumberComPort[1] = connectionSetup.ComPort2.Text;
+            NumberComPort[2] = connectionSetup.ComPort3.Text;
+            NumberComPort[3] = connectionSetup.ComPort4.Text;
+            TypeConnection = connectionSetup.TypeConnection.Text;
+            CountPorts = connectionSetup.CountPorts.Text;
+            ServerIP = connectionSetup.ServerIP.Text;
+            NumberServerPort[0] = connectionSetup.ServerPort1.Text;
+            NumberServerPort[1] = connectionSetup.ServerPort2.Text;
+            NumberServerPort[2] = connectionSetup.ServerPort3.Text;
+            NumberServerPort[3] = connectionSetup.ServerPort4.Text;
+        }
+
+        SerialPort port;
+        private void ModbusTest_Click(object sender, RoutedEventArgs e)
+        {
+            // Читаем конфигурацию для опрашиваемых устройств
+            try
+            {
+                foreach (ViewShield s in myPanel.Children) // Перебираем все шкафы
+                {
+                    foreach (object d in s.ShieldPanel.Children) // Перебираем все устройства
+                    {
+                        if (d is ViewDevice)
+                        {
+                            byte[] modbusTransmit = Modbus.Request ((byte)((ViewDevice)d).Header.DeviceAddress,3,0,2); // Формируем modbus-запрос
+                            // Если используется Ethernet
+                            if (TypeConnection == "Modbus RTU Over TCP/IP")
+                            {
+                                for (int i = 0; i < int.Parse(CountPorts); i++)
+                                { 
+                                    byte modbusReceive = Modbus.Response(Modbus.Exchange(ServerIP, int.Parse(NumberServerPort[i]), modbusTransmit)); // Принимаем modbus-ответ
+                                    bool testOK = modbusReceive == (byte)((ViewDevice)d).Header.DeviceAddress ? true : false;
+                                    if (testOK)
+                                    {
+                                        ((ViewDevice)d).Background = Brushes.Green;
+                                        break;
+                                    }
+                                    else ((ViewDevice)d).Background = Brushes.Red;
+                                }
+                            }
+                            else if (TypeConnection == "Serial Port")
+                            {
+                                for (int i = 0; i < int.Parse(CountPorts); i++)
+                                {
+                                    int dataBits = 8;
+                                    string stopBits = "1";
+                                    try
+                                    {
+                                        port = new SerialPort();
+                                        port.PortName = NumberComPort[i];
+                                        port.BaudRate = ((ViewDevice)d).Header.DeviceBaudRate;
+                                        port.Parity = (Parity)Enum.Parse(typeof(Parity), ((ViewDevice)d).Header.DeviceParity);
+                                        port.DataBits = dataBits;
+                                        port.StopBits = (StopBits)Enum.Parse(typeof(StopBits), stopBits);
+                                        port.ReadTimeout = 100;
+                                    }
+                                    catch
+                                    {
+                                        MessageBox.Show("Ошибка соединения\nПожалуй проверьте настройки сети и попробуйте еще раз!");
+                                    }
+                                    try
+                                    {
+                                        port.Open();
+                                    }
+                                    catch (Exception)
+                                    {
+                                        MessageBox.Show("Невозможно открыть порт");
+                                        return;
+                                    }
+                                    // Запись сообщения в порт
+                                    port.Write(modbusTransmit, 0, modbusTransmit.Length);
+
+                                    byte[] response = new byte[255];
+
+                                    try
+                                    {
+                                        port.Read(response, 0, 255);
+                                        byte modbusReceive = Modbus.Response(response); // Принимаем modbus-ответ
+                                        bool testOK = modbusReceive == (byte)((ViewDevice)d).Header.DeviceAddress ? true : false;
+                                        if (testOK)
+                                        {
+                                            ((ViewDevice)d).Background = Brushes.Green;
+                                            // Если будет использоваться в цикле, то оператор break нужен
+                                            break;
+                                        }
+                                        else ((ViewDevice)d).Background = Brushes.Red;
+                                    }
+                                    catch (TimeoutException)
+                                    {
+                                        //MessageBox.Show("Время ожидания истекло");
+                                        ((ViewDevice)d).Background = Brushes.Red;
+                                        //return;
+                                    }
+                                    finally
+                                    {
+                                        port.Close();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch { }
+            MessageBox.Show("Тестирование завершено!", "Тестирование", MessageBoxButton.OK);
         }
     }
 }
