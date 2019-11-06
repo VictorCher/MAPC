@@ -3,6 +3,8 @@
 // Дата создания: 16.09.2019г
 
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Ports;
@@ -20,7 +22,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Xml.Serialization;
-
+using System.Windows.Threading;
 
 namespace MAPCreator
 {
@@ -481,11 +483,17 @@ namespace MAPCreator
             SelectedDevice.Signal.RemoveAt(index);
         }
 
-        private void Report_Click(object sender, RoutedEventArgs e)
+        private async void Report_Click(object sender, RoutedEventArgs e)
         {
             List<string> table = new List<string>();
             List<string> label = new List<string>();
             bool avrAV = false;
+
+            progressBar.IsIndeterminate = true;
+            progressBar.Visibility = Visibility.Visible;
+            statusBar.Text = "Подготовка данных...";
+            await Task.Delay(100);
+
             foreach (ViewShield s in myPanel.Children)
             {
                 foreach(object d in s.ShieldPanel.Children)
@@ -520,19 +528,36 @@ namespace MAPCreator
                 label.Insert(47, "Резерв");
             }
 
+            statusBar.Text = "Создание временных файлов...";
+            await Task.Delay(100);
+
             File.Copy(@"Resources\Report.xlt", "Отчёт №.xlt");
             File.WriteAllLines(@"data.xls", table.ToArray(), Encoding.UTF8);
             File.SetAttributes(@"data.xls", FileAttributes.ReadOnly);
             File.WriteAllLines(@"label.xls", label.ToArray(), Encoding.UTF8);
-            File.SetAttributes(@"label.xls", FileAttributes.ReadOnly);            
+            File.SetAttributes(@"label.xls", FileAttributes.ReadOnly);
+
+            statusBar.Text = "Открытие файла отчета...";
+            await Task.Delay(100);
+
             Process.Start(@"data.xls");
             Process.Start(@"label.xls");
             Process.Start(@"Отчёт №.xlt");
             File.SetAttributes(@"data.xls", FileAttributes.Normal);
+
+            statusBar.Text = "Удаление временных файлов...";
+            await Task.Delay(100);
+
             File.Delete(@"data.xls");
             File.SetAttributes(@"label.xls", FileAttributes.Normal);
             File.Delete(@"label.xls");
-            File.Delete(@"Отчёт №.xlt");    
+            File.Delete(@"Отчёт №.xlt");
+
+            progressBar.IsIndeterminate = false;
+            progressBar.Visibility = Visibility.Hidden;
+            statusBar.Text = "Готово";
+            MessageBox.Show("Файл отчета успешно создан!", "Создание отчета", MessageBoxButton.OK);
+            statusBar.Text = "";
         }
 
         private void Exit_Click(object sender, RoutedEventArgs e)
@@ -540,27 +565,45 @@ namespace MAPCreator
             System.Environment.Exit(0);
         }
 
-        private void OpenFile_Click(object sender, RoutedEventArgs e)
+        private async void OpenFile_Click(object sender, RoutedEventArgs e)
         {
             Microsoft.Win32.OpenFileDialog dialog = new Microsoft.Win32.OpenFileDialog();
             dialog.Filter = "Файл конфигурации (*.mapc)|*.mapc";
             dialog.RestoreDirectory = true;
             bool? result = dialog.ShowDialog();
+
+            progressBar.IsIndeterminate = true;
+            progressBar.Visibility = Visibility.Visible;
+            statusBar.Text = "Выполняется открытие файла...";
+            await Task.Delay(100);
+
             if (result == true)
             {
                 SerializationShield serializationShield = new SerializationShield();
                 serializationShield.Read(dialog.FileName, myPanel, UpdateForm_Click);
                 SortShield();
             }
+            this.Title = "Map Creator - " + dialog.FileName;
+
+            progressBar.IsIndeterminate = false;
+            progressBar.Visibility = Visibility.Hidden;
+            statusBar.Text = "Готово";
             MessageBox.Show("Файл конфигурации успешно открыт!", "Открытие", MessageBoxButton.OK);
+            statusBar.Text = "";
         }
 
-        private void SaveFile_Click(object sender, RoutedEventArgs e)
+        private async void SaveFile_Click(object sender, RoutedEventArgs e)
         {
             Microsoft.Win32.SaveFileDialog dialog = new Microsoft.Win32.SaveFileDialog();
             dialog.Filter = "Файл конфигурации (*.mapc)|*.mapc";
-            dialog.RestoreDirectory = true;
+            dialog.RestoreDirectory = true;     
             bool? result = dialog.ShowDialog();
+
+            progressBar.IsIndeterminate = true;
+            progressBar.Visibility = Visibility.Visible;
+            statusBar.Text = "Выполняется сохранение файла...";
+            await Task.Delay(100);
+
             if (result == true)
             {
                 SerializationShield serializationShield = new SerializationShield();
@@ -568,7 +611,11 @@ namespace MAPCreator
                 this.Title = "Map Creator - " + dialog.FileName;
             }
 
+            progressBar.IsIndeterminate = false;
+            progressBar.Visibility = Visibility.Hidden;
+            statusBar.Text = "Готово";
             MessageBox.Show("Файл конфигурации успешно сохранен!", "Сохранение", MessageBoxButton.OK);
+            statusBar.Text = "";
         }
 
         private void Help_Click(object sender, RoutedEventArgs e)
@@ -622,23 +669,25 @@ namespace MAPCreator
         }
 
         SerialPort port;
-        private void ModbusTest_Click(object sender, RoutedEventArgs e)
+        private async void ModbusTest_Click(object sender, RoutedEventArgs e)
         {
             // Читаем конфигурацию для опрашиваемых устройств
             try
             {
+                progressBar.Visibility = Visibility.Visible;
+                //statusBar.Text = "Выполняется тестирование...";
                 foreach (ViewShield s in myPanel.Children) // Перебираем все шкафы
                 {
                     foreach (object d in s.ShieldPanel.Children) // Перебираем все устройства
                     {
                         if (d is ViewDevice)
                         {
-                            byte[] modbusTransmit = Modbus.Request ((byte)((ViewDevice)d).Header.DeviceAddress,3,0,2); // Формируем modbus-запрос
-                            // Если используется Ethernet
+                            byte[] modbusTransmit = Modbus.Request((byte)((ViewDevice)d).Header.DeviceAddress, 3, 0, 2); // Формируем modbus-запрос
+                                                                                                                         // Если используется Ethernet
                             if (TypeConnection == "Modbus RTU Over TCP/IP")
                             {
                                 for (int i = 0; i < int.Parse(CountPorts); i++)
-                                { 
+                                {
                                     byte modbusReceive = Modbus.Response(Modbus.Exchange(ServerIP, int.Parse(NumberServerPort[i]), modbusTransmit)); // Принимаем modbus-ответ
                                     bool testOK = modbusReceive == (byte)((ViewDevice)d).Header.DeviceAddress ? true : false;
                                     if (testOK)
@@ -708,12 +757,20 @@ namespace MAPCreator
                                     }
                                 }
                             }
-                        }
+                            statusBar.Text = "Выполняется тестирование: " + ((ViewDevice)d).Header.ShieldName + ((ViewDevice)d).Header.ShieldNumber +", "+ ((ViewDevice)d).Header.DeviceType +"(Slave " + ((ViewDevice)d).Header.DeviceAddress+")";
+                        }  
+                        progressBar.Maximum = myPanel.Children.Count * s.ShieldPanel.Children.Count;
+                        progressBar.Value++;                     
+                        await Task.Delay(100);
                     }
                 }
+                statusBar.Text = "Готово";
+                MessageBox.Show("Тестирование завершено!", "Тестирование", MessageBoxButton.OK);
             }
-            catch { }
-            MessageBox.Show("Тестирование завершено!", "Тестирование", MessageBoxButton.OK);
+            catch { MessageBox.Show("Ошибка при выполнении тестирования!", "Тестирование", MessageBoxButton.OK); }
+            progressBar.Value = 0;
+            progressBar.Visibility = Visibility.Hidden;
+            statusBar.Text = "";
         }
     }
 }

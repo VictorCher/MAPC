@@ -145,19 +145,14 @@
                 <Label x:Name="label" Content="Пока данная функция не доступна!" Height="25" Width="205"/>
             </TabItem>
         </TabControl>
-        <StatusBar DockPanel.Dock="Bottom" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" Grid.Row="2" Grid.RowSpan="2" VerticalAlignment="Center">
-            <Grid Width="782" Margin="0,-3">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="100*"/>
-                    <ColumnDefinition Width="245"/>
-                </Grid.ColumnDefinitions>
-                <StatusBarItem Grid.Column="0">
-                    <TextBlock Text="Статус:"/>
-                </StatusBarItem>
-                <StatusBarItem Grid.Column="1"  HorizontalContentAlignment="Stretch" >
-                    <ProgressBar Value="50" Height="18" />
-                </StatusBarItem>
-            </Grid>
+        <StatusBar DockPanel.Dock="Bottom" HorizontalContentAlignment="Right" VerticalContentAlignment="Stretch" Grid.Row="2" Grid.RowSpan="2" Background="{DynamicResource WindowBackgroundBrush}">
+            <StatusBarItem Grid.Column="0" Padding="3,0" HorizontalAlignment="Left">
+                <TextBlock x:Name="statusBar" />
+            </StatusBarItem>
+            <StatusBarItem Grid.Column="1"  HorizontalContentAlignment="Stretch" DockPanel.Dock="Right" Width="240" VerticalContentAlignment="Stretch" HorizontalAlignment="Right" Margin="0,0,7,0" >
+                <ProgressBar x:Name="progressBar" Minimum="0" Visibility="Hidden"  />
+            </StatusBarItem>
+
         </StatusBar>
     </Grid>
 </Window>
