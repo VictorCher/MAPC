@@ -99,7 +99,6 @@ namespace MAPCreator
                     tempHeader.ShieldName = s.ShieldName;
                     tempHeader.ShieldNumber = s.ShieldNumber;
 
-                    ViewDevice tempViewDevice = new ViewDevice(tempHeader,UpdateForm_Click);
                     tempViewShield.AddDevice(d.Header.DeviceType, d.Header.DeviceAddress, d.Header.DeviceBaudRate, d.Header.DeviceParity, UpdateForm_Click);
                     int countDevice = tempViewShield.ShieldPanel.Children.Count;
                     foreach (Signal sg in d.DeviceSignal)
@@ -110,9 +109,9 @@ namespace MAPCreator
                         tempSignal.DataType = sg.DataType;
                         tempSignal.RegisterAddress = sg.RegisterAddress;
                         tempSignal.BitNumber = sg.BitNumber;
-
                         ((ViewDevice)tempViewShield.ShieldPanel.Children[countDevice-1]).Signal.Add(tempSignal);
                     }
+                    ((ViewDevice)tempViewShield.ShieldPanel.Children[countDevice - 1]).ChangeFace();
                 }
             }
         }

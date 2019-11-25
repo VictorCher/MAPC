@@ -7,12 +7,16 @@
         mc:Ignorable="d"
         Title="Map Creator" Height="500" Width="800" WindowStartupLocation="CenterScreen" >
     <Grid Margin="0">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="763*"/>
+            <ColumnDefinition Width="29*"/>
+        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="25"/>
             <RowDefinition Height="100*"/>
             <RowDefinition Height="25"/>
         </Grid.RowDefinitions>
-        <DockPanel Height="24" VerticalAlignment="Top" Grid.RowSpan="2">
+        <DockPanel Height="24" VerticalAlignment="Top" Grid.ColumnSpan="2">
             <Menu x:Name="menu" Grid.ColumnSpan="3">
                 <MenuItem Header="Файл" HorizontalAlignment="Left" >
                     <MenuItem Header="Открыть..." Click="OpenFile_Click"/>
@@ -34,15 +38,15 @@
                 </MenuItem>
             </Menu>
         </DockPanel>
-        <TabControl x:Name="tabControl" Margin="0" Grid.Row="1" Padding="4" Grid.RowSpan="2">
+        <TabControl x:Name="tabControl" Margin="0" Grid.Row="1" Padding="4" Grid.RowSpan="2" Grid.ColumnSpan="2">
             <TabItem Header="Формирование группы оборудования">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="100*"/>
                         <ColumnDefinition Width="250"/>
                     </Grid.ColumnDefinitions>
-                    <WrapPanel Name ="myPanel" Margin="10" Grid.Row="1"/>
-                    <GroupBox x:Name="groupBox" Header="Параметры шкафа" HorizontalAlignment="Right" Width="240" Grid.Column="1" Height="385" VerticalAlignment="Top">
+                    <WrapPanel Name ="myPanel" Margin="0,10" Grid.Row="1"/>
+                    <GroupBox x:Name="groupBox" Header="Параметры шкафа" HorizontalAlignment="Right" Width="240" Grid.Column="1" Padding="0" Margin="0,0,0,25">
                         <Grid>
                             <Button x:Name="btnAddShield" Content="Добавить" HorizontalAlignment="Left" Height="22" Margin="10,95,0,0" VerticalAlignment="Top" Width="95" Click="AddShield_Click"/>
                             <ComboBox x:Name="cBoxSType" HorizontalAlignment="Left" Margin="10,35,0,0" VerticalAlignment="Top" Width="95" GotFocus="Object_GotFocus">
@@ -88,10 +92,15 @@
                                 <TextBlock>26</TextBlock>
                                 <TextBlock>27</TextBlock>
                                 <TextBlock>28</TextBlock>
+                                <TextBlock>29</TextBlock>
+                                <TextBlock>30</TextBlock>
+                                <TextBlock>31</TextBlock>
+                                <TextBlock>32</TextBlock>
+                                <TextBlock>33</TextBlock>
                             </ComboBox>
                             <Button x:Name="btnDelShield" Content="Удалить" HorizontalAlignment="Left" Height="22" Margin="117,95,0,0" VerticalAlignment="Top" Width="95" Click="DelShield_Click"/>
                             <Button x:Name="btnEditShield" Content="Да" HorizontalAlignment="Left" Height="22" Margin="182,66,0,0" VerticalAlignment="Top" Width="30" Click="EditShieldNum_Click" IsEnabled="False"/>
-                            <GroupBox x:Name="groupBox1" Header="Параметры устройства" HorizontalAlignment="Left" Height="220" Margin="5,140,0,0" VerticalAlignment="Top" Width="218">
+                            <GroupBox x:Name="groupBox1" Header="Параметры устройства" HorizontalAlignment="Left" Margin="5,140,0,0" Width="218" VerticalAlignment="Top" Height="220">
                                 <Grid>
                                     <Button x:Name="btnAddDevice" Content="Добавить" HorizontalAlignment="Left" Height="22" VerticalAlignment="Top" Width="95" Click="AddDevice_Click" Margin="1,141,0,0" IsEnabled="False"/>
                                     <Button x:Name="btnDelDevice" Content="Удалить" HorizontalAlignment="Left" Height="22" VerticalAlignment="Top" Width="95" Click="DelDevice_Click" Margin="106,141,0,0" IsEnabled="False"/>
@@ -119,6 +128,36 @@
                                         <TextBlock>18</TextBlock>
                                         <TextBlock>19</TextBlock>
                                         <TextBlock>20</TextBlock>
+                                        <TextBlock>21</TextBlock>
+                                        <TextBlock>22</TextBlock>
+                                        <TextBlock>23</TextBlock>
+                                        <TextBlock>24</TextBlock>
+                                        <TextBlock>25</TextBlock>
+                                        <TextBlock>26</TextBlock>
+                                        <TextBlock>27</TextBlock>
+                                        <TextBlock>28</TextBlock>
+                                        <TextBlock>29</TextBlock>
+                                        <TextBlock>30</TextBlock>
+                                        <TextBlock>31</TextBlock>
+                                        <TextBlock>32</TextBlock>
+                                        <TextBlock>33</TextBlock>
+                                        <TextBlock>34</TextBlock>
+                                        <TextBlock>35</TextBlock>
+                                        <TextBlock>36</TextBlock>
+                                        <TextBlock>37</TextBlock>
+                                        <TextBlock>38</TextBlock>
+                                        <TextBlock>39</TextBlock>
+                                        <TextBlock>40</TextBlock>
+                                        <TextBlock>41</TextBlock>
+                                        <TextBlock>42</TextBlock>
+                                        <TextBlock>43</TextBlock>
+                                        <TextBlock>44</TextBlock>
+                                        <TextBlock>45</TextBlock>
+                                        <TextBlock>46</TextBlock>
+                                        <TextBlock>47</TextBlock>
+                                        <TextBlock>48</TextBlock>
+                                        <TextBlock>49</TextBlock>
+                                        <TextBlock>50</TextBlock>
                                     </ComboBox>
                                     <ComboBox x:Name="cBoxDType" HorizontalAlignment="Left" Margin="0,35,0,0" VerticalAlignment="Top" Width="95" ItemsSource="{Binding}" DisplayMemberPath="DeviceType" GotFocus="Object_GotFocus"/>
                                     <Label x:Name="EditDeviceAdr_Label" HorizontalAlignment="Right" Margin="0,108,41,0" VerticalAlignment="Top" Width="162" Height="25" Padding="5,5,0,5"/>
@@ -145,7 +184,7 @@
                 <Label x:Name="label" Content="Пока данная функция не доступна!" Height="25" Width="205"/>
             </TabItem>
         </TabControl>
-        <StatusBar DockPanel.Dock="Bottom" HorizontalContentAlignment="Right" VerticalContentAlignment="Stretch" Grid.Row="2" Grid.RowSpan="2" Background="{DynamicResource WindowBackgroundBrush}">
+        <StatusBar HorizontalContentAlignment="Right" VerticalContentAlignment="Stretch" Grid.Row="2" Background="{DynamicResource WindowBackgroundBrush}" Grid.ColumnSpan="2">
             <StatusBarItem Grid.Column="0" Padding="3,0" HorizontalAlignment="Left">
                 <TextBlock x:Name="statusBar" />
             </StatusBarItem>

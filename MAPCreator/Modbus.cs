@@ -88,6 +88,7 @@ namespace MAPCreator
         /// <returns></returns>
         public static byte Response(byte[] response)
         {
+            if (response.Length == 0) return 0;
             int countByte = 0;
             for(int i = response.Length - 1; i > 0; i--)
             {
@@ -202,7 +203,7 @@ namespace MAPCreator
                     // Отправка сообщения
                     stream.Write(data, 0, data.Length);
                     // Получение ответа
-                    Thread.Sleep(1000); // Ожидаем ответа 1 сек.
+                    Thread.Sleep(100); // Ожидаем ответа 0,1 сек.
                     List<byte> readingData = new List<byte>();
                     while (stream.DataAvailable)
                     {

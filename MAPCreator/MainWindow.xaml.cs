@@ -75,14 +75,17 @@ namespace MAPCreator
             this.Width = 80;
             this.Height = 40;
             this.Margin = new Thickness(0, 0, 0, 10);
-            this.Content = new TextBlock() { Text = $"{header.DeviceType}\n(Slave {header.DeviceAddress})",TextAlignment = TextAlignment.Center };
+            //this.Content = new TextBlock() {Text = $"{Header.DeviceType}\n(Slave {Header.DeviceAddress})",TextAlignment = TextAlignment.Center };
             Signal = new ObservableCollection<Signal>();
+            ChangeFace();
         }
 
-        /*public void ChangeBackground()
+        public void ChangeFace()
         {
-            this.ClearValue(Control.BackgroundProperty); // Восстановление цвета по умолчанию
-        }*/
+            if(this.Signal.Count==0) this.Content = new TextBlock() { Text = $"{Header.DeviceType}\n(Slave {Header.DeviceAddress})", TextAlignment = TextAlignment.Center };
+            else this.Content = new TextBlock() { Text = $"{Header.DeviceType}\n(Slave {Header.DeviceAddress})*", TextAlignment = TextAlignment.Center };
+            //this.ClearValue(Control.BackgroundProperty); // Восстановление цвета по умолчанию
+        }
     }
 
     public class ViewShield : Button
@@ -102,7 +105,7 @@ namespace MAPCreator
             this.Height = 180;
             this.Width = 100;
             this.Cursor = Cursors.Hand;
-            this.Margin = new Thickness(0, 0, 0, 15);
+            this.Margin = new Thickness(0, 0, 0, 10);
             this.Click += UpdateForm_Click;
             this.ShieldPanel.Children.Add(new Label()
             {
@@ -421,11 +424,7 @@ namespace MAPCreator
                                 btnEditDeviceAdr.IsEnabled = false;
                                 EditDeviceAdr_Label.Content = "";
                                 ((ViewDevice)d).Header.DeviceAddress = dNum;
-                                ((ViewDevice)d).Content = new TextBlock()
-                                {
-                                    Text = $"{((ViewDevice)d).Header.DeviceType}\n(Slave {((ViewDevice)d).Header.DeviceAddress})",
-                                    TextAlignment = TextAlignment.Center
-                                };
+                                ((ViewDevice)d).ChangeFace();
                             }
                             //this.Content = new TextBlock() { Text = $"{header.DeviceType}\n(Slave {header.DeviceAddress})", TextAlignment = TextAlignment.Center };
                         }
@@ -471,6 +470,7 @@ namespace MAPCreator
             }
 
             editSignalWindow.ShowDialog();
+            SelectedDevice.ChangeFace();
         }
 
         private void AddSignal(Signal signal)
@@ -485,6 +485,7 @@ namespace MAPCreator
 
         private async void Report_Click(object sender, RoutedEventArgs e)
         {
+            try { 
             List<string> table = new List<string>();
             List<string> label = new List<string>();
             bool avrAV = false;
@@ -558,6 +559,11 @@ namespace MAPCreator
             statusBar.Text = "Готово";
             MessageBox.Show("Файл отчета успешно создан!", "Создание отчета", MessageBoxButton.OK);
             statusBar.Text = "";
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show("Произошла ошибка! Файл отчета не создан!\n" + ex.Message, "Создание отчета", MessageBoxButton.OK);
+            }
         }
 
         private void Exit_Click(object sender, RoutedEventArgs e)
@@ -671,7 +677,17 @@ namespace MAPCreator
         SerialPort port;
         private async void ModbusTest_Click(object sender, RoutedEventArgs e)
         {
-            // Читаем конфигурацию для опрашиваемых устройств
+            foreach (ViewShield s in myPanel.Children)
+            {
+                foreach (object d in s.ShieldPanel.Children)
+                {
+                    if (d is ViewDevice)
+                    {
+                        ((ViewDevice)d).ClearValue(Control.BackgroundProperty); // Восстановление цвета по умолчанию
+                    }
+                }
+            }
+                        // Читаем конфигурацию для опрашиваемых устройств
             try
             {
                 progressBar.Visibility = Visibility.Visible;
@@ -767,7 +783,10 @@ namespace MAPCreator
                 statusBar.Text = "Готово";
                 MessageBox.Show("Тестирование завершено!", "Тестирование", MessageBoxButton.OK);
             }
-            catch { MessageBox.Show("Ошибка при выполнении тестирования!", "Тестирование", MessageBoxButton.OK); }
+            catch(Exception ex)
+            {
+                MessageBox.Show("Ошибка при выполнении тестирования!\n" + ex.Message, "Тестирование", MessageBoxButton.OK);
+            }
             progressBar.Value = 0;
             progressBar.Visibility = Visibility.Hidden;
             statusBar.Text = "";
