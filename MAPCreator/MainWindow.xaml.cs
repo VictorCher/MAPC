@@ -63,6 +63,15 @@ namespace MAPCreator
         public string DeviceType { get; set; }
     }
 
+    public class ViewDataDevice
+    {
+        public string ShieldName { get; set; }
+        public string DeviceType { get; set; }
+        public int DeviceAddress { get; set; }
+        public string SignalName { get; set; }
+        public string DataValue { get; set; }
+    }
+
     public class ViewDevice : Button
     {
         public ObservableCollection<Signal> Signal { get; set; }
@@ -135,6 +144,7 @@ namespace MAPCreator
     /// 
     public partial class MainWindow : Window
     {
+        ObservableCollection<ViewDataDevice> DataFromDevice { get; set; }
         ViewDevice SelectedDevice { get; set; }
         int TempShieldNum { get; set; }
         int TempDeviceAdr { get; set; }
@@ -147,10 +157,13 @@ namespace MAPCreator
             InitializeComponent();
             NumberServerPort = new string[]{ "4001", "4002", "4003", "4004" };
             NumberComPort = new string[] { "COM1", "COM2", "COM3", "COM4" };
+            ServerIP = "192.168.127.254";
             // Определяем путь к папке где лежит исполняемый файл .exe для того, чтобы получить доступ
             // к папке с ресурсами (если программа вызывается не из той папки в которой лежит .exe)
             string globalPath = AppDomain.CurrentDomain.BaseDirectory;
             Pattern = new List<DevicePattern>();
+            DataFromDevice = new ObservableCollection<ViewDataDevice>();
+            listViewDFD.DataContext = DataFromDevice;
             DataContext = Pattern;
             DirectoryInfo dir = new DirectoryInfo(globalPath+ @"\Resources");
             FileInfo[] file = dir.GetFiles("*.csv");
@@ -677,38 +690,96 @@ namespace MAPCreator
         SerialPort port;
         private async void ModbusTest_Click(object sender, RoutedEventArgs e)
         {
+            DataFromDevice.Clear();
+            // Восстановление цвета по умолчанию (для тестирования)
             foreach (ViewShield s in myPanel.Children)
             {
                 foreach (object d in s.ShieldPanel.Children)
                 {
                     if (d is ViewDevice)
                     {
-                        ((ViewDevice)d).ClearValue(Control.BackgroundProperty); // Восстановление цвета по умолчанию
+                        ((ViewDevice)d).ClearValue(Control.BackgroundProperty); 
                     }
                 }
             }
-                        // Читаем конфигурацию для опрашиваемых устройств
+
+            // Читаем конфигурацию для опрашиваемых устройств
             try
             {
                 progressBar.Visibility = Visibility.Visible;
-                //statusBar.Text = "Выполняется тестирование...";
                 foreach (ViewShield s in myPanel.Children) // Перебираем все шкафы
                 {
                     foreach (object d in s.ShieldPanel.Children) // Перебираем все устройства
                     {
                         if (d is ViewDevice)
                         {
+                            // Запрос при тестировании
                             byte[] modbusTransmit = Modbus.Request((byte)((ViewDevice)d).Header.DeviceAddress, 3, 0, 2); // Формируем modbus-запрос
-                                                                                                                         // Если используется Ethernet
+                            
+                            // Если используется Ethernet
                             if (TypeConnection == "Modbus RTU Over TCP/IP")
                             {
                                 for (int i = 0; i < int.Parse(CountPorts); i++)
                                 {
-                                    byte modbusReceive = Modbus.Response(Modbus.Exchange(ServerIP, int.Parse(NumberServerPort[i]), modbusTransmit)); // Принимаем modbus-ответ
-                                    bool testOK = modbusReceive == (byte)((ViewDevice)d).Header.DeviceAddress ? true : false;
+                                    byte[] modbusReceive = Modbus.Response(Modbus.Exchange(ServerIP, int.Parse(NumberServerPort[i]), modbusTransmit)); // Принимаем modbus-ответ
+                                    bool testOK = modbusReceive[0] == (byte)((ViewDevice)d).Header.DeviceAddress ? true : false;
                                     if (testOK)
                                     {
-                                        ((ViewDevice)d).Background = Brushes.Green;
+                                        /*
+                                         * Здесь необходимо реализовать метод по формированию запросов и разбор ответов для заполнения таблицы с данными от устройств
+                                         */
+                                        #region Формирование запросов и разбор ответов для заполнения таблицы с данными от устройств
+
+                                        foreach (Signal sg in ((ViewDevice)d).Signal)
+                                        {
+                                            // Формируем modbus-запрос
+                                            if (sg.DataType=="INT" || sg.DataType=="WORD" || sg.DataType == "BOOL") modbusTransmit = Modbus.Request((byte)((ViewDevice)d).Header.DeviceAddress, (byte)sg.FunctionCode, (ushort)sg.RegisterAddress, 1);
+                                            else modbusTransmit = Modbus.Request((byte)((ViewDevice)d).Header.DeviceAddress, (byte)sg.FunctionCode, (ushort)sg.RegisterAddress, 2);
+                                            
+                                            // Принимаем modbus-ответ
+                                            modbusReceive = Modbus.Response(Modbus.Exchange(ServerIP, int.Parse(NumberServerPort[i]), modbusTransmit));
+                                            // Если код функции больше 128, значит устройство сообщает об ошибке. Необходимо пропустить обработку данного сигнала
+                                            if (modbusReceive[1] <= 128) {
+                                                // Смотрим сколько байт данных доступно и выделяем их из modbus-ответа
+                                                byte[] data = new byte[modbusReceive[2]];
+                                                for (int j = 0; j < modbusReceive[2]; j++)
+                                                {
+                                                    data[j] = modbusReceive[j + 3];
+                                                }
+
+                                                // Обрабатываем данные в соответствии с их типом
+                                                string tempReceive="";
+                                                if (sg.DataType == "INT" || sg.DataType == "WORD") tempReceive = Modbus.ParseWord(data)[0].ToString();
+                                                else if (sg.DataType == "BOOL") tempReceive = Convert.ToInt16(Modbus.ParseBool(data, sg.BitNumber, true)).ToString();
+
+                                                ViewDataDevice newViewDataDevice = new ViewDataDevice();
+                                                newViewDataDevice.ShieldName = ((ViewDevice)d).Header.ShieldName + ((ViewDevice)d).Header.ShieldNumber;
+                                                newViewDataDevice.DeviceType = ((ViewDevice)d).Header.DeviceType;
+                                                newViewDataDevice.DeviceAddress = ((ViewDevice)d).Header.DeviceAddress;
+                                                newViewDataDevice.SignalName = sg.SignalName;
+                                                newViewDataDevice.DataValue = tempReceive;
+
+                                                DataFromDevice.Add(newViewDataDevice);
+                                            }
+                                        }
+                                        
+                                        #endregion
+
+                                        switch (i)
+                                        {
+                                            case 0:
+                                                ((ViewDevice)d).Background = Brushes.Yellow;
+                                                break;
+                                            case 1:
+                                                ((ViewDevice)d).Background = Brushes.Lime;
+                                                break;
+                                            case 2:
+                                                ((ViewDevice)d).Background = Brushes.Cyan;
+                                                break;
+                                            case 3:
+                                                ((ViewDevice)d).Background = Brushes.Magenta;
+                                                break;
+                                        }
                                         break;
                                     }
                                     else ((ViewDevice)d).Background = Brushes.Red;
@@ -728,7 +799,7 @@ namespace MAPCreator
                                         port.Parity = (Parity)Enum.Parse(typeof(Parity), ((ViewDevice)d).Header.DeviceParity);
                                         port.DataBits = dataBits;
                                         port.StopBits = (StopBits)Enum.Parse(typeof(StopBits), stopBits);
-                                        port.ReadTimeout = 100;
+                                        port.ReadTimeout = 500;
                                     }
                                     catch
                                     {
@@ -751,12 +822,69 @@ namespace MAPCreator
                                     try
                                     {
                                         port.Read(response, 0, 255);
-                                        byte modbusReceive = Modbus.Response(response); // Принимаем modbus-ответ
-                                        bool testOK = modbusReceive == (byte)((ViewDevice)d).Header.DeviceAddress ? true : false;
+                                        byte[] modbusReceive = Modbus.Response(response); // Принимаем modbus-ответ
+                                        bool testOK = modbusReceive[0] == (byte)((ViewDevice)d).Header.DeviceAddress ? true : false;
                                         if (testOK)
                                         {
-                                            ((ViewDevice)d).Background = Brushes.Green;
-                                            // Если будет использоваться в цикле, то оператор break нужен
+                                            #region Формирование запросов и разбор ответов для заполнения таблицы с данными от устройств
+
+                                            foreach (Signal sg in ((ViewDevice)d).Signal)
+                                            {
+                                                // Формируем modbus-запрос
+                                                if (sg.DataType == "INT" || sg.DataType == "WORD" || sg.DataType == "BOOL") modbusTransmit = Modbus.Request((byte)((ViewDevice)d).Header.DeviceAddress, (byte)sg.FunctionCode, (ushort)sg.RegisterAddress, 1);
+                                                else modbusTransmit = Modbus.Request((byte)((ViewDevice)d).Header.DeviceAddress, (byte)sg.FunctionCode, (ushort)sg.RegisterAddress, 2);
+                                                
+                                                // Отправляем modbus-запрос
+                                                port.Write(modbusTransmit, 0, modbusTransmit.Length);
+                                                // Принимаем modbus-ответ
+                                                response = new byte[255];
+                                                port.Read(response, 0, 255);
+                                                modbusReceive = Modbus.Response(response);
+                                                // Если код функции больше 128, значит устройство сообщает об ошибке. Необходимо пропустить обработку данного сигнала
+                                                if (modbusReceive[1] <= 128)
+                                                {
+                                                    // Смотрим сколько байт данных доступно и выделяем их из modbus-ответа
+                                                    byte[] data = new byte[modbusReceive[2]];
+                                                    for (int j = 0; j < modbusReceive[2]; j++)
+                                                    {
+                                                        data[j] = modbusReceive[j + 3];
+                                                    }
+
+                                                    // Обрабатываем данные в соответствии с их типом
+                                                    string tempReceive = "";
+                                                    if (sg.DataType == "INT" || sg.DataType == "WORD") tempReceive = Modbus.ParseWord(data)[0].ToString();
+                                                    else if (sg.DataType == "BOOL") tempReceive = Convert.ToInt16(Modbus.ParseBool(data, sg.BitNumber, true)).ToString();
+                                                    /* Здесь  надо будет добавить обработку 4-байтных данных */
+
+                                                    ViewDataDevice newViewDataDevice = new ViewDataDevice();
+                                                    newViewDataDevice.ShieldName = ((ViewDevice)d).Header.ShieldName + ((ViewDevice)d).Header.ShieldNumber;
+                                                    newViewDataDevice.DeviceType = ((ViewDevice)d).Header.DeviceType;
+                                                    newViewDataDevice.DeviceAddress = ((ViewDevice)d).Header.DeviceAddress;
+                                                    newViewDataDevice.SignalName = sg.SignalName;
+                                                    newViewDataDevice.DataValue = tempReceive;
+
+                                                    DataFromDevice.Add(newViewDataDevice);
+                                                }
+                                            }
+                                            
+                                            #endregion
+
+                                            // Меняем цвет устройства в зависимости от того на каком порте оно сидит
+                                            switch (i)
+                                            {
+                                                case 0:
+                                                    ((ViewDevice)d).Background = Brushes.Yellow;
+                                                    break;
+                                                case 1:
+                                                    ((ViewDevice)d).Background = Brushes.Lime;
+                                                    break;
+                                                case 2:
+                                                    ((ViewDevice)d).Background = Brushes.Cyan;
+                                                    break;
+                                                case 3:
+                                                    ((ViewDevice)d).Background = Brushes.Magenta;
+                                                    break;
+                                            }
                                             break;
                                         }
                                         else ((ViewDevice)d).Background = Brushes.Red;
@@ -787,9 +915,17 @@ namespace MAPCreator
             {
                 MessageBox.Show("Ошибка при выполнении тестирования!\n" + ex.Message, "Тестирование", MessageBoxButton.OK);
             }
-            progressBar.Value = 0;
-            progressBar.Visibility = Visibility.Hidden;
-            statusBar.Text = "";
+            finally
+            {
+                progressBar.Value = 0;
+                progressBar.Visibility = Visibility.Hidden;
+                statusBar.Text = "";
+            }        
+        }
+
+        private void ModbusGetData_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

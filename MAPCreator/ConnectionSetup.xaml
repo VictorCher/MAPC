@@ -29,48 +29,48 @@
                 </StackPanel>
                 
             </GroupBox>
-            <GroupBox x:Name="gBoxSerialSetting" Header="Настройки COM-порта" Height="80" Margin="10,10,10,0" IsEnabled="False">
-                <StackPanel Orientation="Horizontal">
-                    <StackPanel x:Name="CPort1" Margin="5,0,0,0" Height="58" Width="70" HorizontalAlignment="Left">
+            <GroupBox x:Name="gBoxSerialSetting" Header="Настройки COM-порта" Height="80" Margin="10,10,10,0" IsEnabled="False" >
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                    <StackPanel x:Name="CPort1" Margin="0" Height="58" HorizontalAlignment="Left" Background="Yellow">
                         <Label Height="22" Content="Порт 1" Padding="0" VerticalContentAlignment="Center" Margin="5,5,5,0" HorizontalContentAlignment="Center" />
-                        <ComboBox x:Name="ComPort1" Width="70" Margin="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                        <ComboBox x:Name="ComPort1" Width="72" Margin="3,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
                     </StackPanel>
-                    <StackPanel x:Name="CPort2" Margin="10,0,0,0" Height="58" Width="70" HorizontalAlignment="Left">
+                    <StackPanel x:Name="CPort2" Margin="0" Height="58" HorizontalAlignment="Left" Background="Lime">
                         <Label Height="22" Content="Порт 2" Padding="0" VerticalContentAlignment="Center" Margin="5,5,5,0" HorizontalContentAlignment="Center" />
-                        <ComboBox x:Name="ComPort2" Width="70" Margin="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                        <ComboBox x:Name="ComPort2" Width="72" Margin="3,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
                     </StackPanel>
-                    <StackPanel x:Name="CPort3" Margin="10,0,0,0" Height="58" Width="70" HorizontalAlignment="Left">
+                    <StackPanel x:Name="CPort3" Margin="0" Height="58" HorizontalAlignment="Left" Background="Cyan">
                         <Label Height="22" Content="Порт 3" Padding="0" VerticalContentAlignment="Center" Margin="5,5,5,0" HorizontalContentAlignment="Center" />
-                        <ComboBox x:Name="ComPort3" Width="70" Margin="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                        <ComboBox x:Name="ComPort3" Width="72" Margin="3,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
                     </StackPanel>
-                    <StackPanel x:Name="CPort4" Margin="10,0,0,0" Height="58" Width="70" HorizontalAlignment="Left">
+                    <StackPanel x:Name="CPort4" Margin="0" Height="58" Background="Magenta" HorizontalAlignment="Left">
                         <Label Height="22" Content="Порт 4" Padding="0" VerticalContentAlignment="Center" Margin="5,5,5,0" HorizontalContentAlignment="Center" />
-                        <ComboBox x:Name="ComPort4" Width="70" Margin="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                        <ComboBox x:Name="ComPort4" Width="72" Margin="3,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Padding="4,3"/>
                     </StackPanel>
                 </StackPanel>
             </GroupBox>
             <GroupBox x:Name="gBoxServerSetting" Header="Удаленный сервер" Height="80" Margin="10,10,10,0" IsEnabled="False">
-                <StackPanel Orientation="Horizontal">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                     <StackPanel Margin="5,0,0,0">
                         <Label Height="22" Content="IP адрес" Padding="0" VerticalContentAlignment="Center" Margin="5,5,5,0"/>
                         <TextBox x:Name="ServerIP" Height="22" Width="100" Text="192.168.127.254" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
                     </StackPanel>
                     
-                    <StackPanel x:Name="SPort1" Margin="5,0,0,0">
+                    <StackPanel x:Name="SPort1" Margin="5,0,0,0" Background="Yellow">
                         <Label Height="22" Content="Порт 1" Padding="0" VerticalContentAlignment="Center" Margin="5,5,5,0"/>
-                        <TextBox x:Name="ServerPort1" Height="22" Width="45" Text="4001" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
+                        <TextBox x:Name="ServerPort1" Height="22" Width="44" Text="4001" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Margin="3,0"/>
                     </StackPanel>
-                    <StackPanel x:Name="SPort2" Margin="5,0,0,0">
+                    <StackPanel x:Name="SPort2" Margin="0" Background="Lime">
                         <Label Height="22" Content="Порт 2" Padding="0" VerticalContentAlignment="Center" Margin="5,5,5,0"/>
-                        <TextBox x:Name="ServerPort2" Height="22" Width="45" Text="4002" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
+                        <TextBox x:Name="ServerPort2" Height="22" Width="44" Text="4002" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Margin="3,0"/>
                     </StackPanel>
-                    <StackPanel x:Name="SPort3" Margin="5,0,0,0">
+                    <StackPanel x:Name="SPort3" Margin="0" Background="Cyan">
                         <Label Height="22" Content="Порт 3" Padding="0" VerticalContentAlignment="Center" Margin="5,5,5,0"/>
-                        <TextBox x:Name="ServerPort3" Height="22" Width="45" Text="4003" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
+                        <TextBox x:Name="ServerPort3" Height="22" Width="44" Text="4003" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Margin="3,0"/>
                     </StackPanel>
-                    <StackPanel x:Name="SPort4" Margin="5,0,0,0">
+                    <StackPanel x:Name="SPort4" Margin="0" Background="Magenta">
                         <Label Height="22" Content="Порт 4" Padding="0" VerticalContentAlignment="Center" Margin="5,5,5,0"/>
-                        <TextBox x:Name="ServerPort4" Height="22" Width="45" Text="4004" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
+                        <TextBox x:Name="ServerPort4" Height="22" Width="44" Text="4004" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Margin="3,0"/>
                     </StackPanel>
                 </StackPanel>
             </GroupBox>

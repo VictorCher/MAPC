@@ -7,10 +7,6 @@
         mc:Ignorable="d"
         Title="Map Creator" Height="500" Width="800" WindowStartupLocation="CenterScreen" >
     <Grid Margin="0">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="763*"/>
-            <ColumnDefinition Width="29*"/>
-        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="25"/>
             <RowDefinition Height="100*"/>
@@ -30,7 +26,7 @@
                     <MenuItem Header="Параметры связи" Click="ConnectionSetup_Click"/>
                     <Separator/>
                     <MenuItem Header="Запустить тестирование" Click="ModbusTest_Click"/>
-                    <MenuItem Header="Получить данные от оборудования" IsEnabled="False"/>
+                    <MenuItem Header="Получить данные от оборудования" Click="ModbusGetData_Click"/>
                 </MenuItem>
                 <MenuItem Header="Помощь">
                     <MenuItem Header="Справка" Click="Help_Click"/>
@@ -181,7 +177,22 @@
                 </Grid>
             </TabItem>
             <TabItem Header="Данные от оборудования">
-                <Label x:Name="label" Content="Пока данная функция не доступна!" Height="25" Width="205"/>
+                <ListView x:Name="listViewDFD" ItemsSource="{Binding}" Padding="0,0,0,22" BorderThickness="0" Margin="0" VerticalContentAlignment="Center"   >
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn  x:Name="Column12" Header="Шкаф" Width="100" DisplayMemberBinding="{Binding ShieldName}" />
+                            <GridViewColumn  x:Name="Column22" Header="Тип оборудования" Width="140" DisplayMemberBinding="{Binding DeviceType}" />
+                            <GridViewColumn  x:Name="Column32" Header="Сетевой адрес" Width="100" DisplayMemberBinding="{Binding DeviceAddress}" />
+                            <GridViewColumn  x:Name="Column42" Header="Наименование сигнала" Width="320" DisplayMemberBinding="{Binding SignalName}"/>
+                            <GridViewColumn  x:Name="Column52" Header="Значение" Width="100" DisplayMemberBinding="{Binding DataValue}"/>
+                        </GridView>
+                    </ListView.View>
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType= "ListViewItem">
+                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                </ListView>
             </TabItem>
         </TabControl>
         <StatusBar HorizontalContentAlignment="Right" VerticalContentAlignment="Stretch" Grid.Row="2" Background="{DynamicResource WindowBackgroundBrush}" Grid.ColumnSpan="2">

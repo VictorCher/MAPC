@@ -86,9 +86,9 @@ namespace MAPCreator
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        public static byte Response(byte[] response)
+        public static byte[] Response(byte[] response)
         {
-            if (response.Length == 0) return 0;
+            if (response.Length == 0) return new byte[0];
             int countByte = 0;
             for(int i = response.Length - 1; i > 0; i--)
             {
@@ -115,11 +115,11 @@ namespace MAPCreator
             if (temp[temp.Length - 2] != CRC[0] || temp[temp.Length - 1] != CRC[1])
             {
                 // Если контрольная сумма не совпадает, то дальше не разбираем
-                return 0;
+                return new byte[0];
             }
 
             // Разбор ответа
-            byte id = temp[0];
+            //byte id = temp[0];
             /*byte function = response[1];
             if (function > 128) // Если код функции больше 128, то обрабатываем ошибку
             {
@@ -138,7 +138,7 @@ namespace MAPCreator
             {
                 data[i] = response[i + 3];
             }*/
-            return id;
+            return temp;
         }
 
         /// <summary>
@@ -166,24 +166,24 @@ namespace MAPCreator
         /// <param name="data"></param>
         /// <param name="convert">Преобразование из 16-битных данных (по умолчанию из 8-битных)</param>
         /// <returns></returns>
-        public static short[] ParseBool(byte[] data, bool convert)
+        public static bool ParseBool(byte[] data, int? bitNumber, bool convert)
         {
             byte[] buffer;
             if (convert == true) buffer = Swap16Bits(data); // Меняем старший и младший байты местами
             else buffer = data;
             int count = buffer.Length;
             int index = 0;
-            short[] result = new short[count * 8];
+            bool[] result = new bool[count * 8];
             for (int i = 0; i < count; i++)
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    if ((buffer[i] & (1 << j)) == 0) result[index] = 0;
-                    else result[index] = 1;
+                    if ((buffer[i] & (1 << j)) == 0) result[index] = false;
+                    else result[index] = true;
                     index++;
                 }
             }
-            return result;
+            return result[(int)bitNumber];
         }
 
         /// <summary>
