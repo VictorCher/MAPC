@@ -533,8 +533,8 @@ namespace MAPCreator
             }
             if (avrAV )
             {
-                label.Insert(46, "Отключение ВВ при АВР АВ");
-                label.Insert(47, "Включение ВВ при ВНР АВ");
+                label.Insert(46, "Отключение     от АВР АВ");
+                label.Insert(47, "Включение     от ВНР АВ");
             }
             else
             {
